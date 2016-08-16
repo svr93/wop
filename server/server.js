@@ -17,9 +17,16 @@ const server = http.createServer((request, response) => {
         const sseListener = new SSE(server);
         sseListener.on('connection', (client) => {
 
-            temperature.eventEmitter.on('value', (value) => {
+            const callback = function(value) {
 
                 client.send(value.toString());
+            };
+            temperature.eventEmitter.on('value', callback);
+            client.on('close', () => {
+
+                const userAgent = client.req.headers[ 'user-agent' ];
+                console.log(`Connection closed with ${ userAgent }`);
+                temperature.eventEmitter.removeListener('value', callback);
             });
         });
     } else {
