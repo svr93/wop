@@ -17,9 +17,13 @@ const server = http.createServer((request, response) => {
         const sseListener = new SSE(server);
         sseListener.on('connection', (client) => {
 
+            /**
+             * Callback for 'value' event.
+             * @param {{ temperature: number, humidity: number }} value
+             */
             const callback = function(value) {
 
-                client.send(value.toString());
+                client.send(JSON.stringify(value));
             };
             temperature.eventEmitter.on('value', callback);
             client.on('close', () => {

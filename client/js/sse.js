@@ -17,7 +17,8 @@
          evtSource = new EventSource(url);
          evtSource.onmessage = function(evt) {
 
-             el.innerHTML = evt.data;
+             const resultObj = JSON.parse(evt.data);
+             el.innerHTML = resultObj.temperature;
          };
          evtSource.onerror = function(evt) {
 
