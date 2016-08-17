@@ -25,6 +25,11 @@ const server = http.createServer((request, response) => {
 
                 client.send(JSON.stringify(value));
             };
+            const lastData = temperature.getLastData();
+            if (lastData) {
+
+                callback(lastData);
+            }
             temperature.eventEmitter.on('value', callback);
             client.on('close', () => {
 

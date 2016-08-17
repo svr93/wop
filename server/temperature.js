@@ -49,24 +49,24 @@ const getValueFromSensor = function f() {
 
 const startEmit = function f() {
 
-    timerId = setTimeout(() => {
+    getValueFromSensor()
+        .then((resultObj) => {
 
-        getValueFromSensor()
-            .then((resultObj) => {
+            if (resultObj.temperature !== previousResultObj.temperature ||
+                resultObj.humidity !== previousResultObj.humidity) {
 
-                if (resultObj.temperature !== previousResultObj.temperature ||
-                    resultObj.humidity !== previousResultObj.humidity) {
+                eventEmitter.emit('value', resultObj);
+            }
+            previousResultObj = resultObj;
+        })
+        .catch((err) => {
 
-                    eventEmitter.emit('value', resultObj);
-                }
-                previousResultObj = resultObj;
-            })
-            .catch((err) => {
+            console.log(`getValueFromSensor error: ${ err.message }`);
+        })
+        .then(() => {
 
-                console.log(`getValueFromSensor error: ${ err.message }`);
-            })
-            .then(() => f());
-    }, checkDelay);
+            timerId = setTimeout(() => f(), checkDelay);
+        });
 };
 
 const stopEmit = function() {
@@ -74,9 +74,19 @@ const stopEmit = function() {
     clearTimeout(timerId);
 };
 
+/**
+ * Gets last temperature & humidity value.
+ * @return {({ temperature: number, humidity: number }|null)}
+ */
+function getLastData() {
+
+    return Object.keys(previousResultObj).length ? previousResultObj : null;
+}
+
 module.exports = {
 
     init: startEmit,
     close: stopEmit,
     eventEmitter: eventEmitter,
+    getLastData: getLastData,
 };
